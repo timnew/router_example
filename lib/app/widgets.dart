@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:router_example/app/app.dart';
 
 import 'navigation/navigation_item.dart';
 import 'navigation/navigation_stack.dart';
@@ -37,15 +38,40 @@ class SimpleScreen extends StatelessWidget {
       );
 }
 
-typedef DestinationBuilder = NavigationItem Function(BuildContext context);
+typedef DestinationBuilder = NavigationItem Function();
+
+class AppButton extends StatelessWidget {
+  final EdgeInsetsGeometry padding;
+  final Widget label;
+  final VoidCallback onPressed;
+
+  const AppButton({
+    Key? key,
+    this.padding = const EdgeInsets.all(8),
+    required this.label,
+    required this.onPressed,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Padding(
+        padding: padding,
+        child: OutlinedButton.icon(
+          icon: const Icon(Icons.golf_course),
+          label: label,
+          onPressed: onPressed,
+        ),
+      );
+}
 
 class NavigationButton extends StatelessWidget {
+  final EdgeInsetsGeometry padding;
   final Widget label;
   final NavigationItem? destination;
   final DestinationBuilder? builder;
 
   const NavigationButton.builder({
     Key? key,
+    this.padding = const EdgeInsets.all(8.0),
     required this.label,
     required DestinationBuilder this.builder,
   })  : destination = null,
@@ -53,16 +79,16 @@ class NavigationButton extends StatelessWidget {
 
   const NavigationButton({
     Key? key,
+    this.padding = const EdgeInsets.all(8.0),
     required this.label,
     required NavigationItem this.destination,
   })  : builder = null,
         super(key: key);
 
   @override
-  Widget build(BuildContext context) => OutlinedButton.icon(
-        icon: const Icon(Icons.golf_course),
+  Widget build(BuildContext context) => AppButton(
+        padding: padding,
         label: label,
-        onPressed: () =>
-            NavigationStack.it.goTo(destination ?? builder!(context)),
+        onPressed: () => NavigationStack.it.goTo(destination ?? builder!()),
       );
 }

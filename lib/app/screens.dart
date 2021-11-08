@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:router_example/app/navigation/navigation_stack.dart';
 
 import 'navigation/navigation_item.dart';
 import 'widgets.dart';
@@ -22,25 +22,110 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) => SimpleScreen(
         title: "Home",
-        child: TextField(
-          controller: _controller,
-          decoration: const InputDecoration(
-            labelText: "Keywords",
-            border: OutlineInputBorder(),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints.tightFor(width: 400),
+          child: TextField(
+            controller: _controller,
+            decoration: const InputDecoration(
+              labelText: "Keywords",
+            ),
           ),
         ),
         destinations: [
           NavigationButton.builder(
             label: const Text("Search"),
-            builder: (_) =>
-                NavigationItem.searchResult(query: _controller.text),
+            builder: () => NavigationItem.searchResult(query: _controller.text),
           ),
-          const Padding(
-            padding: EdgeInsets.only(top: 16.0),
-            child: NavigationButton(
-              label: Text("Settings"),
-              destination: NavigationItem.settings(),
+          AppButton(
+            label: const Text("Show Form"),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (_) => SearchForm(controller: _controller),
+              );
+            },
+          ),
+          AppButton(
+            label: const Text("Show Bogttom Sheet"),
+            onPressed: () {
+              showModalBottomSheet(
+                context: context,
+                builder: (_) => const RecentSearchSheet(),
+              );
+            },
+          ),
+          const NavigationButton(
+            padding: EdgeInsets.symmetric(vertical: 16.0),
+            label: Text("Settings"),
+            destination: NavigationItem.settings(),
+          ),
+        ],
+      );
+}
+
+class SearchForm extends StatelessWidget {
+  final TextEditingController controller;
+  const SearchForm({
+    Key? key,
+    required this.controller,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => SimpleDialog(
+        title: const Text("Search Form"),
+        contentPadding: const EdgeInsets.all(16.0),
+        children: [
+          TextField(
+            controller: controller,
+            decoration: const InputDecoration(
+              labelText: "Keywords",
             ),
+          ),
+          AppButton(
+            label: const Text("Search"),
+            onPressed: () {
+              Navigator.of(context).pop();
+              NavigationStack.it
+                  .goTo(NavigationItem.searchResult(query: controller.text));
+            },
+          ),
+        ],
+      );
+}
+
+class RecentSearchSheet extends StatelessWidget {
+  const RecentSearchSheet({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) => Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          ListTile(
+            title: const Text("Recent 1"),
+            onTap: () {
+              Navigator.of(context).pop();
+              NavigationStack.it.goTo(
+                const NavigationItem.searchResult(query: "recent_1"),
+              );
+            },
+          ),
+          ListTile(
+            title: const Text("Recent 2"),
+            onTap: () {
+              Navigator.of(context).pop();
+              NavigationStack.it.goTo(
+                const NavigationItem.searchResult(query: "recent_2"),
+              );
+            },
+          ),
+          ListTile(
+            title: const Text("Recent 1"),
+            onTap: () {
+              Navigator.of(context).pop();
+              NavigationStack.it.goTo(
+                const NavigationItem.searchResult(query: "recent_1"),
+              );
+            },
           ),
         ],
       );
