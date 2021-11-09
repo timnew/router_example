@@ -87,6 +87,6 @@ class NavigationButton extends StatelessWidget {
         padding: padding,
         label: label,
         onPressed: () =>
-            navigationController().navigateTo(destination ?? builder!()),
+            navigationController.navigateTo(destination ?? builder!()),
       );
 }

@@ -80,7 +80,7 @@ class SearchForm extends StatelessWidget {
             label: const Text("Search"),
             onPressed: () {
               Navigator.of(context).pop();
-              navigationController().navigateTo(
+              navigationController.navigateTo(
                 SearchResultDestination(query: controller.text),
               );
             },
@@ -100,7 +100,7 @@ class RecentSearchSheet extends StatelessWidget {
             title: const Text("Recent 1"),
             onTap: () {
               Navigator.of(context).pop();
-              navigationController().navigateTo(
+              navigationController.navigateTo(
                 const SearchResultDestination(query: "recent_1"),
               );
             },
@@ -109,7 +109,7 @@ class RecentSearchSheet extends StatelessWidget {
             title: const Text("Recent 2"),
             onTap: () {
               Navigator.of(context).pop();
-              navigationController().navigateTo(
+              navigationController.navigateTo(
                 const SearchResultDestination(query: "recent_2"),
               );
             },
@@ -118,7 +118,7 @@ class RecentSearchSheet extends StatelessWidget {
             title: const Text("Recent 1"),
             onTap: () {
               Navigator.of(context).pop();
-              navigationController().navigateTo(
+              navigationController.navigateTo(
                 const SearchResultDestination(query: "recent_3"),
               );
             },

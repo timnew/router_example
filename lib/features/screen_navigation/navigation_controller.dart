@@ -15,8 +15,10 @@ class NavigationController extends RouterDelegate<DestinationStack>
 
   DestinationStack _current;
 
-  NavigationController(this.pageFactory, DestinationStack intial)
-      : _current = intial;
+  NavigationController({
+    required this.pageFactory,
+    required DestinationStack initialStack,
+  }) : _current = initialStack;
 
   @protected
   void setCurrent(DestinationStack value) {

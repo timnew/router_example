@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'destination_stack.dart';
+import 'bad_destination.dart';
 import 'route_path_visitor.dart';
 
 mixin Destination {
@@ -9,15 +9,11 @@ mixin Destination {
   LocalKey get key => ValueKey(this);
   String? get restorationId => null;
 
-  @override
-  bool operator ==(Object other);
-
   Iterable<String> toLocationParts() => [name];
 
-  Iterable<Destination>? tryNavigateFrom(Destination destination);
+  Iterable<Destination>? tryNavigateFrom(Destination destination) => null;
   Iterable<Destination>? tryBuildRootStack() => null;
 
-  Destination parseChildPath(RoutePathVisitor visitor);
-
-  DestinationStack unableToReachFrom(DestinationStack from);
+  Destination parseChildPath(RoutePathVisitor visitor) =>
+      BadDestination.from(visitor);
 }

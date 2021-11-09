@@ -7,14 +7,6 @@ class AppDestinationStackParser extends DestinationStackParser {
   const AppDestinationStackParser();
 
   @override
-  DestinationStack buildRootStack() =>
-      const HomeDestination().asSingleNodeStack();
-
-  @override
-  DestinationStack onLocationIsEmpty() =>
-      BadNavigationDestination.emptyLocation().asSingleNodeStack();
-
-  @override
   PageFactory buildPageFactory() {
     final result = PageFactory();
 
@@ -42,13 +34,17 @@ class AppDestinationStackParser extends DestinationStackParser {
       ..screen<SettingsDestination>(
         (context, destination) => const SettingsScreen(),
       )
-      ..screen<BadNavigationDestination>(
+      ..screen<BadDestination>(
         (context, stack) => NavigationErrorScreen(
-          message: stack.as<BadNavigationDestination>().message,
-          location: stack.as<BadNavigationDestination>().detail,
+          message: stack.as<BadDestination>().message,
+          location: stack.as<BadDestination>().detail,
         ),
       );
 
     return result;
   }
+
+  @override
+  DestinationStack buildRootStack() =>
+      const HomeDestination().asSingleNodeStack();
 }

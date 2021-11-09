@@ -1,5 +1,6 @@
 import 'package:built_collection/built_collection.dart';
 
+import 'bad_destination.dart';
 import 'destination.dart';
 import 'route_path_visitor.dart';
 
@@ -53,7 +54,7 @@ class DestinationStack {
   DestinationStack popUntil(DestionPredicate criteria) =>
       isRoot && criteria(current) ? this : _stack!.popUntil(criteria);
 
-  DestinationStack navigateTo(Destination node, {DestinationStack? from}) {
+  DestinationStack navigateTo(Destination node, {DestinationStack? origin}) {
     if (current == node) {
       return this;
     }
@@ -69,10 +70,11 @@ class DestinationStack {
             .pushAll(rootNodes.skip(1));
       }
 
-      return node.unableToReachFrom(from ?? this);
+      return BadDestination.unreachableLocation(from: origin ?? this, to: node)
+          .asSingleNodeStack();
     }
 
-    return _stack!.navigateTo(node, from: from ?? this);
+    return _stack!.navigateTo(node, origin: origin ?? this);
   }
 
   DestinationStack pushPath(RoutePathVisitor visitor) {

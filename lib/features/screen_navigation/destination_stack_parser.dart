@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
+import 'bad_destination.dart';
 import 'destination_stack.dart';
 import 'page_factory.dart';
 import 'route_path_visitor.dart';
@@ -38,7 +39,8 @@ abstract class DestinationStackParser
 
   DestinationStack onLocationIsNull() => onLocationIsEmpty();
 
-  DestinationStack onLocationIsEmpty();
+  DestinationStack onLocationIsEmpty() =>
+      BadDestination.emptyLocation().asSingleNodeStack();
 
   DestinationStack buildRootStack();
 

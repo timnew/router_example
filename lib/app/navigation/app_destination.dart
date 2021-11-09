@@ -3,67 +3,8 @@ import 'package:router_example/features/screen_navigation.dart';
 
 part 'app_destination.freezed.dart';
 
-abstract class AppDestination with Destination {
-  const AppDestination();
-
-  @override
-  DestinationStack unableToReachFrom(DestinationStack from) =>
-      BadNavigationDestination.unableNavigate(from: from, to: this)
-          .asSingleNodeStack();
-}
-
 @freezed
-class BadNavigationDestination extends AppDestination
-    with _$BadNavigationDestination {
-  const BadNavigationDestination._();
-
-  const factory BadNavigationDestination({
-    required String message,
-    required String detail,
-  }) = _BadNavigationDestination;
-
-  factory BadNavigationDestination.emptyLocation() =>
-      const BadNavigationDestination(
-        message: "No Location",
-        detail: "",
-      );
-
-  factory BadNavigationDestination.unknownLocation(String location) =>
-      BadNavigationDestination(
-        message: "Unknown Location",
-        detail: location,
-      );
-
-  factory BadNavigationDestination.unableNavigate({
-    required DestinationStack from,
-    required AppDestination to,
-  }) =>
-      BadNavigationDestination(
-        message: "Unable to navigate",
-        detail: "${from.current} -> $to",
-      );
-
-  @override
-  String get name => "unknown_location";
-
-  @override
-  Destination parseChildPath(RoutePathVisitor visitor) {
-    visitor.badLocation();
-    return this;
-  }
-
-  @override
-  Iterable<String> toLocationParts() => [name];
-
-  @override
-  Iterable<Destination>? tryBuildRootStack() => [this];
-
-  @override
-  Iterable<Destination>? tryNavigateFrom(Destination destination) => null;
-}
-
-@freezed
-class HomeDestination extends AppDestination with _$HomeDestination {
+class HomeDestination with _$HomeDestination, Destination {
   const HomeDestination._();
   const factory HomeDestination() = _HomeDestination;
 
@@ -80,12 +21,12 @@ class HomeDestination extends AppDestination with _$HomeDestination {
       case "settings":
         return const SettingsDestination();
       case "404":
-        return BadNavigationDestination(
+        return BadDestination(
           message: visitor.consume(),
           detail: visitor.consume(),
         );
       default:
-        return BadNavigationDestination.unknownLocation(visitor.badLocation());
+        return BadDestination.from(visitor);
     }
   }
 
@@ -101,8 +42,7 @@ class HomeDestination extends AppDestination with _$HomeDestination {
 }
 
 @freezed
-class SearchResultDestination extends AppDestination
-    with _$SearchResultDestination {
+class SearchResultDestination with _$SearchResultDestination, Destination {
   const SearchResultDestination._();
 
   const factory SearchResultDestination({required String query}) =
@@ -120,22 +60,20 @@ class SearchResultDestination extends AppDestination
       case "detail":
         return DetailDestination(title: visitor.consume());
       default:
-        return BadNavigationDestination.unknownLocation(visitor.badLocation());
+        return BadDestination.from(visitor);
     }
   }
 
   @override
   Iterable<Destination>? tryNavigateFrom(Destination destination) {
-    if (destination is HomeDestination) {
-      return [this];
-    }
+    if (destination is HomeDestination) return [this];
 
     return null;
   }
 }
 
 @freezed
-class DetailDestination extends AppDestination with _$DetailDestination {
+class DetailDestination with _$DetailDestination, Destination {
   const DetailDestination._();
 
   const factory DetailDestination({required String title}) = _DetailDestination;
@@ -152,22 +90,20 @@ class DetailDestination extends AppDestination with _$DetailDestination {
       case "action":
         return const ActionDestination();
       default:
-        return BadNavigationDestination.unknownLocation(visitor.badLocation());
+        return BadDestination.from(visitor);
     }
   }
 
   @override
   Iterable<Destination>? tryNavigateFrom(Destination destination) {
-    if (destination is SearchResultDestination) {
-      return [this];
-    }
+    if (destination is SearchResultDestination) return [this];
 
     return null;
   }
 }
 
 @freezed
-class ActionDestination extends AppDestination with _$ActionDestination {
+class ActionDestination with _$ActionDestination, Destination {
   const ActionDestination._();
 
   const factory ActionDestination() = _ActionDestination;
@@ -176,31 +112,21 @@ class ActionDestination extends AppDestination with _$ActionDestination {
   String get name => "action";
 
   @override
-  Destination parseChildPath(RoutePathVisitor visitor) =>
-      BadNavigationDestination.unknownLocation(visitor.badLocation());
-
-  @override
   Iterable<Destination>? tryNavigateFrom(Destination destination) {
-    if (destination is DetailDestination) {
-      return [this];
-    }
+    if (destination is DetailDestination) return [this];
 
     return null;
   }
 }
 
 @freezed
-class SettingsDestination extends AppDestination with _$SettingsDestination {
+class SettingsDestination with _$SettingsDestination, Destination {
   const SettingsDestination._();
 
   const factory SettingsDestination() = _SettingsDestination;
 
   @override
   String get name => "settings";
-
-  @override
-  Destination parseChildPath(RoutePathVisitor visitor) =>
-      BadNavigationDestination.unknownLocation(visitor.badLocation());
 
   @override
   Iterable<Destination>? tryBuildRootStack() => const [

@@ -25,8 +25,8 @@ class AppState extends State<App> {
     _locationParser = const AppDestinationStackParser();
 
     _navigationController = NavigationController(
-      _locationParser.buildPageFactory(),
-      _locationParser.buildRootStack(),
+      pageFactory: _locationParser.buildPageFactory(),
+      initialStack: _locationParser.buildRootStack(),
     );
 
     registerNavigationControllerProvider(

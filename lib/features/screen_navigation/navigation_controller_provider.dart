@@ -10,4 +10,4 @@ void registerNavigationControllerProvider(
   _provider = provider;
 }
 
-NavigationController navigationController() => _provider();
+NavigationController get navigationController => _provider();
