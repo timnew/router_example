@@ -7,82 +7,75 @@ typedef StackUpdater = void Function(ListBuilder<Destination> b);
 typedef DestionPredicate = bool Function(Destination d);
 
 class DestinationStack {
-  final BuiltList<Destination> allNodes;
+  final DestinationStack? _stack;
+  final Destination current;
 
-  DestinationStack._(Iterable<Destination> nodes)
-      : assert(nodes.isNotEmpty),
-        allNodes = BuiltList.of(nodes);
+  DestinationStack._(this._stack, this.current);
 
-  factory DestinationStack.root(Destination node) => DestinationStack._([node]);
+  factory DestinationStack.root(Destination node) =>
+      DestinationStack._(null, node);
 
-  Destination get current => allNodes.last;
-  Destination? get parentNode =>
-      allNodes.length > 1 ? allNodes[allNodes.length - 2] : null;
+  Iterable<Destination> get allNodes sync* {
+    if (_stack != null) {
+      yield* _stack!.allNodes;
+    }
+    yield current;
+  }
 
-  Destination rootNode() => allNodes.first;
+  Iterable<DestinationStack> get allStacks sync* {
+    if (_stack != null) {
+      yield* _stack!.allStacks;
+    }
+    yield this;
+  }
 
-  int get depth => allNodes.length;
+  D as<D extends Destination>() => current as D;
+  D? safeAs<D extends Destination>() => current is D ? current as D : null;
+  D? find<D extends Destination>() => safeAs<D>() ?? _stack?.find<D>();
 
-  bool get isRoot => depth == 1;
+  int get depth => _stack?.depth ?? 0 + 1;
+
+  bool get isRoot => _stack == null;
 
   String buildLocation() =>
       allNodes.expand((d) => d.toLocationParts()).join('/');
 
-  DestinationStack update(StackUpdater updater) =>
-      DestinationStack._(allNodes.rebuild(updater));
+  DestinationStack pop() => _stack != null ? _stack! : this;
 
-  DestinationStack pop() => isRoot ? this : update((b) => b.removeLast());
+  DestinationStack push(Destination node) => DestinationStack._(this, node);
 
-  DestinationStack push(Destination node) => update((b) => b.add(node));
+  DestinationStack pushAll(Iterable<Destination> nodes) {
+    if (nodes.isEmpty) return this;
+    final stack = DestinationStack._(this, nodes.first);
+    return stack.pushAll(nodes.skip(1));
+  }
 
-  DestinationStack popUntil(DestionPredicate criteria) => update((b) {
-        while (b.isNotEmpty && !criteria(b.last)) {
-          b.removeLast();
-        }
-      });
+  DestinationStack popUntil(DestionPredicate criteria) =>
+      isRoot && criteria(current) ? this : _stack!.popUntil(criteria);
 
-  DestinationStack pushAll(Iterable<Destination> nodes) => update((b) {
-        b.addAll(nodes);
-      });
-
-  DestinationStack navigateTo(Destination node) {
-    if (allNodes.contains(node)) {
-      return popUntil(
-        (d) => d == node,
-      );
+  DestinationStack navigateTo(Destination node, {DestinationStack? from}) {
+    if (current == node) {
+      return this;
+    }
+    final newNodes = node.tryNavigateFrom(current);
+    if (newNodes != null) {
+      return pushAll(newNodes);
     }
 
-    final popped = allNodes.rebuild((b) {
-      while (b.isNotEmpty) {
-        final newNodes = node.tryNavigateFrom(b.last);
-        if (newNodes != null) {
-          assert(newNodes.last == node);
-          b.addAll(newNodes);
-          break;
-        }
-        b.removeLast();
+    if (isRoot) {
+      final rootNodes = node.tryBuildRootStack();
+      if (rootNodes != null && rootNodes.isNotEmpty) {
+        return DestinationStack.root(rootNodes.first)
+            .pushAll(rootNodes.skip(1));
       }
-    });
 
-    if (popped.isNotEmpty && popped.last == node) {
-      return DestinationStack._(popped);
+      return node.unableToReachFrom(from ?? this);
     }
 
-    assert(popped.isEmpty);
-
-    final newNodes = node.tryBuildRootStack();
-
-    if (newNodes != null && newNodes.isNotEmpty) {
-      assert(newNodes.last == node);
-
-      return DestinationStack._(newNodes);
-    }
-
-    return node.unableToReachFrom(this);
+    return _stack!.navigateTo(node, from: from ?? this);
   }
 
   DestinationStack pushPath(RoutePathVisitor visitor) {
-    print("Push ${visitor.peek} on $current");
     final destination = current.parseChildPath(visitor);
     return navigateTo(destination);
   }

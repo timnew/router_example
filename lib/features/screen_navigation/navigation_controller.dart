@@ -34,8 +34,8 @@ class NavigationController extends RouterDelegate<DestinationStack>
         onPopPage: onPopPage,
       );
 
-  List<Page> buildPages(BuildContext context) => _current.allNodes
-      .map((d) => pageFactory.buildPage(context, d))
+  List<Page> buildPages(BuildContext context) => _current.allStacks
+      .map((s) => pageFactory.buildPage(context, s))
       .toList(growable: false);
 
   bool onPopPage(Route route, dynamic result) {

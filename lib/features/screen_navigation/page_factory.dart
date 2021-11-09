@@ -1,15 +1,16 @@
 import 'package:flutter/material.dart';
 
 import 'destination.dart';
+import 'destination_stack.dart';
 
-typedef PageBuilder<D extends Destination> = Page Function(
+typedef PageBuilder = Page Function(
   BuildContext context,
-  D destination,
+  DestinationStack stack,
 );
 
-typedef ScreenWidgetBuilder<D extends Destination> = Widget Function(
+typedef ScreenWidgetBuilder = Widget Function(
   BuildContext context,
-  D destination,
+  DestinationStack stack,
 );
 
 class PageFactory {
@@ -17,43 +18,39 @@ class PageFactory {
 
   PageFactory();
 
-  void page<D extends Destination>(PageBuilder<D> pageFactory) {
+  void page<D extends Destination>(PageBuilder pageFactory) {
     _factories.add(_FactoryItem<D>.page(pageFactory));
   }
 
   void screen<D extends Destination>(
-    ScreenWidgetBuilder<D> screenWidgetFactory,
+    ScreenWidgetBuilder screenWidgetFactory,
   ) {
     _factories.add(_FactoryItem<D>.screen(screenWidgetFactory));
   }
 
-  Page buildPage(BuildContext context, Destination destination) {
+  Page buildPage(BuildContext context, DestinationStack stack) {
     final factory = _factories.firstWhere(
-      (f) => f.canBuild(destination),
+      (f) => f.canBuild(stack.current),
       orElse: () => throw ArgumentError(
-        "No factory registered for $destination",
+        "No factory registered for ${stack.current}",
       ),
     );
 
-    return factory.build(context, destination);
+    return factory.build(context, stack);
   }
 }
 
 class _FactoryItem<D extends Destination> {
   final PageBuilder build;
 
-  _FactoryItem(this.build);
+  _FactoryItem.page(this.build);
 
-  factory _FactoryItem.page(PageBuilder<D> pageBuilder) => _FactoryItem(
-        (c, d) => pageBuilder(c, d as D),
-      );
-
-  factory _FactoryItem.screen(ScreenWidgetBuilder<D> screenWidgetBuilder) =>
-      _FactoryItem(
-        (c, d) => MaterialPage(
-          key: d.key,
-          restorationId: d.restorationId,
-          child: screenWidgetBuilder(c, d as D),
+  factory _FactoryItem.screen(ScreenWidgetBuilder screenWidgetBuilder) =>
+      _FactoryItem.page(
+        (c, s) => MaterialPage(
+          key: s.current.key,
+          restorationId: s.current.restorationId,
+          child: screenWidgetBuilder(c, s),
         ),
       );
 
