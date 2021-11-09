@@ -20,7 +20,7 @@ class HomeDestination with _$HomeDestination, Destination {
         return SearchResultDestination(query: visitor.consume());
       case "settings":
         return const SettingsDestination();
-      case "404":
+      case "bad_destination":
         return BadDestination(
           message: visitor.consume(),
           detail: visitor.consume(),
