@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:router_example/app/app.dart';
-
-import 'navigation/navigation_item.dart';
-import 'navigation/navigation_stack.dart';
+import 'package:router_example/features/screen_navigation.dart';
 
 class SimpleScreen extends StatelessWidget {
   final String title;
@@ -38,7 +35,7 @@ class SimpleScreen extends StatelessWidget {
       );
 }
 
-typedef DestinationBuilder = NavigationItem Function();
+typedef DestinationBuilder = Destination Function();
 
 class AppButton extends StatelessWidget {
   final EdgeInsetsGeometry padding;
@@ -66,7 +63,7 @@ class AppButton extends StatelessWidget {
 class NavigationButton extends StatelessWidget {
   final EdgeInsetsGeometry padding;
   final Widget label;
-  final NavigationItem? destination;
+  final Destination? destination;
   final DestinationBuilder? builder;
 
   const NavigationButton.builder({
@@ -81,7 +78,7 @@ class NavigationButton extends StatelessWidget {
     Key? key,
     this.padding = const EdgeInsets.all(8.0),
     required this.label,
-    required NavigationItem this.destination,
+    required Destination this.destination,
   })  : builder = null,
         super(key: key);
 
@@ -89,6 +86,7 @@ class NavigationButton extends StatelessWidget {
   Widget build(BuildContext context) => AppButton(
         padding: padding,
         label: label,
-        onPressed: () => NavigationStack.it.goTo(destination ?? builder!()),
+        onPressed: () =>
+            navigationController().navigateTo(destination ?? builder!()),
       );
 }

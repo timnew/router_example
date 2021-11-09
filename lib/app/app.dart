@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:router_example/app/navigation/navigation_stack.dart';
+import 'package:router_example/features/screen_navigation.dart';
 
-import 'navigation/app_route_info_parser.dart';
-import 'navigation/navigation_delegate.dart';
+import 'navigation/app_navigation_parser.dart';
 
 final GlobalKey<AppState> _appStateKey = GlobalKey<AppState>();
 
@@ -16,21 +15,23 @@ class App extends StatefulWidget {
 }
 
 class AppState extends State<App> {
-  late NavigationStack _navigationStack;
-  late AppRouteDelegate _appRouteDelegate;
-  late AppRouteInfoParser _appRouteInfoParser;
+  late NavigationController _navigationController;
+  late AppDestinationStackParser _locationParser;
 
   @override
   void initState() {
     super.initState();
 
-    _navigationStack = NavigationStack();
+    _locationParser = const AppDestinationStackParser();
 
-    NavigationStack.navigationStackProvider =
-        () => _appStateKey.currentState!._navigationStack;
+    _navigationController = NavigationController(
+      _locationParser.buildPageFactory(),
+      _locationParser.buildRootStack(),
+    );
 
-    _appRouteDelegate = AppRouteDelegate(_navigationStack);
-    _appRouteInfoParser = AppRouteInfoParser();
+    registerNavigationControllerProvider(
+      () => _appStateKey.currentState!._navigationController,
+    );
   }
 
   @override
@@ -39,7 +40,7 @@ class AppState extends State<App> {
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
-        routeInformationParser: _appRouteInfoParser,
-        routerDelegate: _appRouteDelegate,
+        routeInformationParser: _locationParser,
+        routerDelegate: _navigationController,
       );
 }
