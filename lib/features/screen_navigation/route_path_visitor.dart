@@ -13,7 +13,7 @@ class RoutePathVisitor {
     if (location.endsWith(seperator)) {
       _parts.removeLast();
     }
-    _parts = _parts.reversed.toList(growable: false);
+    _parts = _parts.reversed.toList();
   }
 
   String badLocation() {

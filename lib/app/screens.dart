@@ -174,8 +174,8 @@ class DetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SimpleScreen(
         title: "Detail: $title",
-        destinations: [
-          const NavigationButton(
+        destinations: const [
+          NavigationButton(
             label: Text("Action"),
             destination: ActionDestination(),
           ),

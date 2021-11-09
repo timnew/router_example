@@ -52,7 +52,7 @@ class DestinationStack {
       );
     }
 
-    final popped = update((b) {
+    final popped = allNodes.rebuild((b) {
       while (b.isNotEmpty) {
         final newNodes = node.tryNavigateFrom(b.last);
         if (newNodes != null) {
@@ -64,11 +64,11 @@ class DestinationStack {
       }
     });
 
-    if (popped.current == node) {
-      return popped;
+    if (popped.isNotEmpty && popped.last == node) {
+      return DestinationStack._(popped);
     }
 
-    assert(popped.allNodes.isEmpty);
+    assert(popped.isEmpty);
 
     final newNodes = node.tryBuildRootStack();
 
