@@ -225,14 +225,22 @@ class NavigationErrorScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SimpleScreen(
         title: "Page Not Found",
-        child: ListTile(
-          title: Text(message),
-          subtitle: Text(location),
+        child: Center(
+          child: Column(
+            children: [
+              Text(message, style: Theme.of(context).textTheme.headline6),
+              Text(location),
+            ],
+          ),
         ),
         destinations: const [
           NavigationButton(
             label: Text("Return Home"),
             destination: HomeDestination(),
+          ),
+          NavigationButton(
+            label: Text("Settings"),
+            destination: SettingsDestination(),
           ),
         ],
       );

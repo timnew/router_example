@@ -19,19 +19,18 @@ class AppDestinationStackParser extends DestinationStackParser {
     final result = PageFactory();
 
     result
-      ..screenFactory<HomeDestination>(
-          (context, destination) => const HomeScreen())
-      ..screenFactory<SearchResultDestination>((context, destination) =>
+      ..screen<HomeDestination>((context, destination) => const HomeScreen())
+      ..screen<SearchResultDestination>((context, destination) =>
           SearchResultScreen(query: destination.query))
-      ..screenFactory<DetailDestination>((context, destination) => DetailScreen(
+      ..screen<DetailDestination>((context, destination) => DetailScreen(
             query: "",
             title: destination.title,
           ))
-      ..screenFactory<ActionDestination>(
+      ..screen<ActionDestination>(
           (context, destination) => ActionScreen(query: "", title: ""))
-      ..screenFactory<SettingsDestination>(
+      ..screen<SettingsDestination>(
           (context, destination) => const SettingsScreen())
-      ..screenFactory<BadNavigationDestination>(
+      ..screen<BadNavigationDestination>(
           (context, destination) => NavigationErrorScreen(
                 message: destination.message,
                 location: destination.detail,

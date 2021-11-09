@@ -41,7 +41,7 @@ class DestinationStack {
         }
       });
 
-  DestinationStack pushStack(Iterable<Destination> nodes) => update((b) {
+  DestinationStack pushAll(Iterable<Destination> nodes) => update((b) {
         b.addAll(nodes);
       });
 
@@ -82,6 +82,7 @@ class DestinationStack {
   }
 
   DestinationStack pushPath(RoutePathVisitor visitor) {
+    print("Push ${visitor.peek} on $current");
     final destination = current.parseChildPath(visitor);
     return navigateTo(destination);
   }

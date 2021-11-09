@@ -8,7 +8,8 @@ abstract class AppDestination with Destination {
 
   @override
   DestinationStack unableToReachFrom(DestinationStack from) =>
-      from.push(BadNavigationDestination.unableNavigate(from: from, to: this));
+      BadNavigationDestination.unableNavigate(from: from, to: this)
+          .asSingleNodeStack();
 }
 
 @freezed
@@ -43,7 +44,7 @@ class BadNavigationDestination extends AppDestination
       );
 
   @override
-  String get name => "404";
+  String get name => "unknown_location";
 
   @override
   Destination parseChildPath(RoutePathVisitor visitor) {
@@ -52,7 +53,7 @@ class BadNavigationDestination extends AppDestination
   }
 
   @override
-  Iterable<String> toLocationParts() => [name, message, detail];
+  Iterable<String> toLocationParts() => [name];
 
   @override
   Iterable<Destination>? tryBuildRootStack() => [this];
@@ -67,11 +68,13 @@ class HomeDestination extends AppDestination with _$HomeDestination {
   const factory HomeDestination() = _HomeDestination;
 
   @override
-  String get name => "home";
+  String get name => "";
 
   @override
   Destination parseChildPath(RoutePathVisitor visitor) {
     switch (visitor.consume()) {
+      case "":
+        return this;
       case "search":
         return SearchResultDestination(query: visitor.consume());
       case "settings":
@@ -90,7 +93,11 @@ class HomeDestination extends AppDestination with _$HomeDestination {
   Iterable<Destination>? tryBuildRootStack() => [this];
 
   @override
-  Iterable<Destination>? tryNavigateFrom(Destination destination) => null;
+  Iterable<Destination>? tryNavigateFrom(Destination destination) {
+    if (destination is HomeDestination) return const [];
+
+    return null;
+  }
 }
 
 @freezed
@@ -102,7 +109,7 @@ class SearchResultDestination extends AppDestination
       _SearchResultDestination;
 
   @override
-  String get name => "/search";
+  String get name => "search";
 
   @override
   Iterable<String> toLocationParts() => [name, query];
@@ -196,5 +203,14 @@ class SettingsDestination extends AppDestination with _$SettingsDestination {
       BadNavigationDestination.unknownLocation(visitor.badLocation());
 
   @override
-  Iterable<Destination>? tryNavigateFrom(Destination destination) => [this];
+  Iterable<Destination>? tryBuildRootStack() => const [
+        HomeDestination(),
+        SettingsDestination(),
+      ];
+
+  @override
+  Iterable<Destination>? tryNavigateFrom(Destination destination) {
+    if (destination is HomeDestination) return [this];
+    return null;
+  }
 }

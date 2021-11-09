@@ -13,32 +13,49 @@ typedef ScreenWidgetBuilder<D extends Destination> = Widget Function(
 );
 
 class PageFactory {
-  final Map<Type, PageBuilder> _pageFactories = <Type, PageBuilder>{};
+  final List<_FactoryItem> _factories = [];
 
   PageFactory();
 
-  void pageFactory<D extends Destination>(PageBuilder<D> pageFactory) {
-    _pageFactories[D] = (c, d) => pageFactory(c, d as D);
+  void page<D extends Destination>(PageBuilder<D> pageFactory) {
+    _factories.add(_FactoryItem<D>.page(pageFactory));
   }
 
-  void screenFactory<D extends Destination>(
+  void screen<D extends Destination>(
     ScreenWidgetBuilder<D> screenWidgetFactory,
   ) {
-    _pageFactories[D] = (c, d) => MaterialPage(
-          key: d.key,
-          restorationId: d.restorationId,
-          child: screenWidgetFactory(c, d as D),
-        );
+    _factories.add(_FactoryItem<D>.screen(screenWidgetFactory));
   }
 
   Page buildPage(BuildContext context, Destination destination) {
-    final type = destination.runtimeType;
-    final factory = _pageFactories[type];
-    if (factory == null) {
-      throw ArgumentError(
-        'No factory registered for type $type',
-      );
-    }
-    return factory(context, destination);
+    final factory = _factories.firstWhere(
+      (f) => f.canBuild(destination),
+      orElse: () => throw ArgumentError(
+        "No factory registered for $destination",
+      ),
+    );
+
+    return factory.build(context, destination);
   }
+}
+
+class _FactoryItem<D extends Destination> {
+  final PageBuilder build;
+
+  _FactoryItem(this.build);
+
+  factory _FactoryItem.page(PageBuilder<D> pageBuilder) => _FactoryItem(
+        (c, d) => pageBuilder(c, d as D),
+      );
+
+  factory _FactoryItem.screen(ScreenWidgetBuilder<D> screenWidgetBuilder) =>
+      _FactoryItem(
+        (c, d) => MaterialPage(
+          key: d.key,
+          restorationId: d.restorationId,
+          child: screenWidgetBuilder(c, d as D),
+        ),
+      );
+
+  bool canBuild(Destination destination) => destination is D;
 }
